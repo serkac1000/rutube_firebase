@@ -140,12 +140,12 @@ export default function Home() {
           </div>
 
           {isLoading && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between text-sm font-medium">
                 <span>Translation Progress</span>
                 <span>{Math.round(progress)}%</span>
               </div>
-              <Progress value={progress} />
+              <Progress value={progress} className="h-2" />
             </div>
           )}
 
@@ -167,9 +167,9 @@ export default function Home() {
               {isLoading ? 'Translating...' : 'Translate'}
             </Button>
             {isLoading && (
-              <Button variant="destructive" onClick={resetState}>
+              <Button variant="destructive" onClick={resetState} className="flex items-center">
                 <Square className="mr-2 h-4 w-4" />
-                Stop
+                Stop Translation
               </Button>
             )}
             {translatedText && (
