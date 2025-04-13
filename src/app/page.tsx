@@ -10,16 +10,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Download, FileUp, Play } from 'lucide-react';
+import { Download, FileUp, Play, Square } from 'lucide-react';
 
 export default function Home() {
   const [fileContent, setFileContent] = useState<string>('');
   const [translatedText, setTranslatedText] = useState<string>('');
   const [audioUrl, setAudioUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
+
+  const resetState = () => {
+    setFileContent('');
+    setTranslatedText('');
+    setAudioUrl('');
+    setProgress(0);
+    setIsLoading(false);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsLoading(true);
@@ -50,12 +60,20 @@ export default function Home() {
     setTranslatedText('');
     setAudioUrl('');
     try {
-      // Attempt translation with retry mechanism
+      let currentProgress = 0;
+      const updateProgress = () => {
+        currentProgress += 33.33;
+        setProgress(Math.min(currentProgress, 100));
+      };
+
+      updateProgress(); // Start progress
       const translationResult = await retryTranslation({ text: fileContent, attempts: 3 });
+      updateProgress(); // Update after translation
 
       if (translationResult) {
         setTranslatedText(translationResult.translatedText);
         setAudioUrl(translationResult.audioBlobUrl);
+        updateProgress(); // Complete progress
       } else {
         toast({
           title: "Translation failed",
@@ -98,12 +116,11 @@ export default function Home() {
     <div className="flex flex-col items-center justify-start min-h-screen py-8 bg-primary">
       <Card className="w-full max-w-2xl p-4 space-y-4 bg-white shadow-md rounded-lg">
         <CardHeader className="text-center">
-          <h1 className="text-2xl font-semibold">LinguaFile</h1>
+          <h1 className="text-2xl font-semibold">MyTranslator</h1>
           <p className="text-muted-foreground">Translate your English text files to Russian</p>
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* File Upload Section */}
           <div className="flex flex-col space-y-2">
             <label htmlFor="file-upload" className="block text-sm font-medium text-foreground">
               Upload Text File (.txt, .csv)
@@ -116,11 +133,22 @@ export default function Home() {
                 onChange={handleFileChange}
                 disabled={isLoading}
               />
-              {isLoading && <Skeleton className="w-16 h-8" />}
+              <Button onClick={resetState} variant="outline">
+                New File
+              </Button>
             </div>
           </div>
 
-          {/* Translation Display Section */}
+          {isLoading && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Translation Progress</span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+              <Progress value={progress} />
+            </div>
+          )}
+
           <div className="flex flex-col space-y-2">
             <label htmlFor="translated-text" className="block text-sm font-medium text-foreground">
               Translated Russian Text
@@ -134,11 +162,16 @@ export default function Home() {
             />
           </div>
 
-          {/* Action Buttons Section */}
           <div className="flex items-center space-x-4">
             <Button onClick={handleTranslate} disabled={isLoading || !fileContent}>
               {isLoading ? 'Translating...' : 'Translate'}
             </Button>
+            {isLoading && (
+              <Button variant="destructive" onClick={resetState}>
+                <Square className="mr-2 h-4 w-4" />
+                Stop
+              </Button>
+            )}
             {translatedText && (
               <>
                 <Button variant="secondary" onClick={handlePlay} disabled={isLoading || !audioUrl}>
