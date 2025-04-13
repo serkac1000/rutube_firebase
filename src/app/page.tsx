@@ -114,7 +114,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen py-8 bg-primary">
-      <Card className="w-full max-w-2xl p-4 space-y-4 bg-white shadow-md rounded-lg">
+      <Card className="w-full max-w-2xl p-4 space-y-4 bg-white shadow-lg rounded-lg border">
         <CardHeader className="text-center">
           <h1 className="text-2xl font-semibold">MyTranslator</h1>
           <p className="text-muted-foreground">Translate your English text files to Russian</p>
@@ -145,7 +145,7 @@ export default function Home() {
                 <span>Translation Progress</span>
                 <span>{Math.round(progress)}%</span>
               </div>
-              <Progress value={progress} className="h-2" />
+              <Progress value={progress} className="h-3 bg-gray-200" />
             </div>
           )}
 
